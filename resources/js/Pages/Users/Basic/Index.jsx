@@ -11,15 +11,15 @@ import { debounce, pickBy } from "lodash";
 import React, { useCallback, useEffect, useState } from "react";
 import Create from "./Create";
 import Edit from "./Edit";
-import Table from "@/Components/Table";
-import NavTab from "@/Layouts/NavTab";
-import Navbar from "@/Layouts/Navbar";
-import { Fragment } from "react";
 import { Tab } from "@headlessui/react";
-import { IconPaperclip } from "@tabler/icons-react";
 import TextInput from "@/Components/TextInput";
-import DatePicker from "@/Components/DatePicker/DatePicker";
 import InputLabel from "@/Components/InputLabel";
+import { usePermission } from "@/Composables/Permission";
+
+
+const { hasRole } = usePermission();
+const { hasPermission } = usePermission();
+
 
 const UpIcon = () => (
     <svg
@@ -53,15 +53,21 @@ const DownIcon = () => (
 export default function Index(props) {
     const { data: people, meta, filtered, attributes } = props.users;
     const roles = props.roles;
+    
     const [pageNumber, setPageNumber] = useState([]);
     const [params, setParams] = useState(filtered);
-
+    const [isOpenAddDialog, setIsOpenAddDialog] = useState(false);
+    const [isOpenEditDialog, setIsOpenEditDialog] = useState(false);
+    const [isOpenDestroyDialog, setIsOpenDestroyDialog] = useState(false);
+    const [enabled, setEnabled] = useState(false);
+    const [state, setState] = useState([]);
     const [isInitialRender, setIsInitialRender] = useState(true);
+
+
     const reload = useCallback(
         debounce((query) => {
             router.get(
                 route(route().current()),
-                // route("riskRegisterKlinis.index"),
                 { ...pickBy(query), page: query.page },
                 {
                     preserveState: true,
@@ -97,8 +103,6 @@ export default function Index(props) {
         };
         setParams(updatedParams);
     };
-    // const onChange = (event) =>
-    //     setParams({ ...params, [event.target.name]: event.target.value });
     const sort = (item) => {
         setParams({
             ...params,
@@ -125,16 +129,12 @@ export default function Index(props) {
             onSuccess: () => setIsOpenDestroyDialog(false),
         });
     };
-    const [isOpenAddDialog, setIsOpenAddDialog] = useState(false);
-    const [isOpenEditDialog, setIsOpenEditDialog] = useState(false);
-    const [isOpenDestroyDialog, setIsOpenDestroyDialog] = useState(false);
-    const [enabled, setEnabled] = useState(false);
-    const [state, setState] = useState([]);
-
     function classNames(...classes) {
         return classes.filter(Boolean).join(" ");
     }
-
+    var curr = new Date();
+curr.setDate(curr.getDate());
+var date = curr.toISOString().substring(0,10);
     return (
         <>
             <Head title="User" />
@@ -245,10 +245,32 @@ export default function Index(props) {
                                 <div className="w-1/2">
                                     <div className="flex items-center justify-start mt-2 mb-0 gap-x-1">
                                         <ThirdButton
+                                        color="sky"
                                             type="button"
                                             onClick={openAddDialog}
                                         >
-                                            Tambah
+                                            Periksa
+                                        </ThirdButton>
+                                        <ThirdButton
+                                        color="teal"
+                                            type="button"
+                                            onClick={openAddDialog}
+                                        >
+                                            Panggil
+                                        </ThirdButton>
+                                        <ThirdButton
+                                        color="cyan"
+                                            type="button"
+                                            onClick={openAddDialog}
+                                        >
+                                            Refresh
+                                        </ThirdButton>
+                                        <ThirdButton
+                                        color="yellow"
+                                            type="button"
+                                            onClick={openAddDialog}
+                                        >
+                                            Ubah Dokter
                                         </ThirdButton>
                                         
                                     </div>
@@ -256,10 +278,12 @@ export default function Index(props) {
                                 <div className="w-1/2">
                                     <div className="flex items-center justify-end mt-4 mb-0 gap-x-1">
                                     <InputLabel htmlFor="Periode" value="Periode" />
+                                    {/* <input id="dateRequired" type="date" name="dateRequired" defaultValue={date} /> */}
                                         <TextInput
                                             type="date"
                                             id="name"
                                             name="name"
+                                            defaultValue={date}
                                             className="block w-1/4 "
                                             autoComplete="name"
                                             isFocused={true}
@@ -268,6 +292,7 @@ export default function Index(props) {
                                         <InputLabel htmlFor="Sampai" value="Sampai" />
                                         <TextInput
                                             type="date"
+                                            defaultValue={date}
                                             id="name"
                                             name="name"
                                             className="block w-1/4 "
